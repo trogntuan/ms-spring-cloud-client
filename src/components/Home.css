@@ -1,5 +1,6 @@
 .home-container {
-  min-height: 100vh;
+  min-height: 95vh;
+  min-width: 100vw;
   background: #f8f9fa;
 }
 

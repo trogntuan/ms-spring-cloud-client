@@ -12,9 +12,9 @@ const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2>OAuth2 Authorization Code Flow</h2>
+        <h2>Microservice with Spring Cloud Sample</h2>
         <p className="login-description">
-          Click the button below to authenticate with the OAuth2 server using Authorization Code flow.
+          Click the button below to authenticate with the OAuth2 server.
         </p>
         
         <button 
@@ -25,7 +25,7 @@ const Login: React.FC = () => {
           {loading ? 'Redirecting...' : 'Login with OAuth2'}
         </button>
 
-        <div className="oauth-info">
+        {/* <div className="oauth-info">
           <h4>OAuth2 Configuration:</h4>
           <div className="config-details">
             <p><strong>Authorization Server:</strong> localhost:9000</p>
@@ -34,7 +34,7 @@ const Login: React.FC = () => {
             <p><strong>Scopes:</strong> READ WRITE</p>
             <p><strong>Response Type:</strong> code</p>
           </div>
-        </div>
+        </div> */}
 
         <div className="flow-info">
           <h4>Authorization Code Flow:</h4>

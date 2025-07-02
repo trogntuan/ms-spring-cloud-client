@@ -14,9 +14,7 @@ class ApiService {
   constructor() {
     this.api = axios.create({
       baseURL: API_BASE_URL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      withCredentials: true,
     });
 
     // Add request interceptor to include auth token
@@ -24,7 +22,8 @@ class ApiService {
       (config) => {
         const token = localStorage.getItem('accessToken');
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers = config.headers || {};
+          config.headers['Authorization'] = `Bearer ${token}`;
         }
         return config;
       },
@@ -115,6 +114,50 @@ class ApiService {
     }
   }
 
+  // Get product list
+  async getProductList(): Promise<any[]> {
+    try {
+      const response = await this.api.get('/product-service/all');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get product list failed:', error);
+      throw error;
+    }
+  }
+
+  // Create order
+  async createOrder(order: any): Promise<any> {
+    try {
+      const response = await this.api.post('/order-service', order);
+      return response.data;
+    } catch (error: any) {
+      console.error('Create order failed:', error);
+      throw error;
+    }
+  }
+
+  // Get order list
+  async getOrderList(): Promise<any[]> {
+    try {
+      const response = await this.api.get('/order-service');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get order list failed:', error);
+      throw error;
+    }
+  }
+
+  // WELCOME USER
+  async getMessage(): Promise<any[]> {
+    try {
+      const response = await this.api.get('/order-service/welcome');
+      return response.data;
+    } catch (error: any) {
+      console.error('getMessage failed:', error);
+      throw error;
+    }
+  }
+
   // Logout
   logout(): void {
     localStorage.removeItem('accessToken');
@@ -132,4 +175,24 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService(); 
+export const apiService = new ApiService();
+
+export const getUserInfo = async () => {
+  return await apiService.getUserInfo();
+};
+
+export const getProductList = async () => {
+  return await apiService.getProductList();
+};
+
+export const createOrder = async (order: any) => {
+  return await apiService.createOrder(order);
+};
+
+export const getOrderList = async () => {
+  return await apiService.getOrderList();
+}; 
+
+export const getMessage = async () => {
+  return await apiService.getMessage();
+};

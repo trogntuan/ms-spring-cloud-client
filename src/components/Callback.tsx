@@ -35,7 +35,7 @@ const Callback: React.FC = () => {
         navigate('/home');
       } catch (err: any) {
         console.error('Callback processing failed:', err);
-        setError(err.response?.data?.error_description || 'Failed to exchange code for token');
+        setError(err.response?.data?.error_description || '');
         setIsProcessing(false);
       }
     };
