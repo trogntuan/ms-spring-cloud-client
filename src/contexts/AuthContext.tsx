@@ -22,9 +22,9 @@ type AuthAction =
   | { type: 'LOAD_USER_FAILURE' };
 
 const initialState: AuthState = {
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('accessToken') && !!localStorage.getItem('user'),
   accessToken: localStorage.getItem('accessToken'),
-  user: null,
+  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null,
   loading: false,
 };
 
@@ -110,13 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Chỉ load user một lần khi component mount và có accessToken
   useEffect(() => {
-    if (!isInitialized.current && state.accessToken && !state.user) {
-      isInitialized.current = true;
+    if (state.accessToken) {
       loadUser();
     }
-  }, []); // Empty dependency array
+    // eslint-disable-next-line
+  }, []); // Luôn fetch lại user info khi có accessToken
 
   const value: AuthContextType = {
     ...state,

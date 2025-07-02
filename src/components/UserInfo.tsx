@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card, Descriptions, Spin, Tag } from "antd";
-import { getUserInfo } from "../services/api";
 import { DollarCircleFilled } from "@ant-design/icons";
+import { useAuth } from '../contexts/AuthContext';
 
-export default function UserInfo() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+interface UserInfoProps {
+  reloadTrigger?: number;
+}
 
-  useEffect(() => {
-    getUserInfo().then((res) => {
-      setUser(res.data || res); // fix trường hợp trả về {data: ...}
-      setLoading(false);
-    });
-  }, []);
+export default function UserInfo({ reloadTrigger = 0 }: UserInfoProps) {
+  const { user, loading } = useAuth();
 
   if (loading) return <Spin />;
-
   if (!user) return <div>No user info</div>;
 
   return (

@@ -1,18 +1,42 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Spin, Card, Tag } from "antd";
+import { Table, Button, Spin, Card, Tag, Tooltip } from "antd";
 import { getProductList } from "../services/api";
 import { DollarCircleFilled, ShoppingCartOutlined } from "@ant-design/icons";
 
-export default function ProductList({ onSelectProduct }: { onSelectProduct: (product: any) => void }) {
+interface ProductListProps {
+  onSelectProduct: (product: any) => void;
+  reloadTrigger?: number;
+  selectedProducts?: any[];
+}
+
+export default function ProductList({ onSelectProduct, reloadTrigger = 0, selectedProducts = [] }: ProductListProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getProductList().then((res) => {
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res: any = await getProductList();
       setProducts(res.data || res);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
       setLoading(false);
-    });
-  }, []);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [reloadTrigger]);
+
+  const getProductInCart = (productId: string) => {
+    return selectedProducts.find(p => p.productId === productId);
+  };
+
+  const isMaxStockReached = (product: any) => {
+    const productInCart = getProductInCart(product.productId);
+    return productInCart && productInCart.quantity >= product.productStock;
+  };
 
   const columns = [
     { 
@@ -30,25 +54,48 @@ export default function ProductList({ onSelectProduct }: { onSelectProduct: (pro
       title: "Stock", 
       dataIndex: "productStock",
       key: "productStock",
-      render: (stock: number) => (
-        <Tag color={stock > 0 ? "green" : "red"}>
-          {stock > 0 ? `${stock}` : "Out of stock"}
-        </Tag>
-      )
+      render: (stock: number, record: any) => {
+        const productInCart = getProductInCart(record.productId);
+        const availableStock = stock - (productInCart?.quantity || 0);
+        
+        return (
+          <div>
+            <Tag color={availableStock > 0 ? "green" : "red"}>
+              {availableStock > 0 ? `${availableStock}` : "Out of stock"}
+            </Tag>
+            {productInCart && (
+              <Tag color="blue" style={{ marginLeft: "4px" }}>
+                In cart: {productInCart.quantity}
+              </Tag>
+            )}
+          </div>
+        );
+      }
     },
     {
       title: "Action",
       key: "action",
-      render: (_: any, record: any) => (
-        <Button 
-          icon={<ShoppingCartOutlined />}
-          type="dashed" 
-          onClick={() => onSelectProduct(record)}
-          disabled={record.productStock <= 0}
-        >
-          Add to Cart
-        </Button>
-      ),
+      render: (_: any, record: any) => {
+        const isMaxStock = isMaxStockReached(record);
+        const productInCart = getProductInCart(record.productId);
+        const availableStock = record.productStock - (productInCart?.quantity || 0);
+        
+        return (
+          <Tooltip 
+            title={isMaxStock ? "Maximum quantity reached in cart" : 
+                   availableStock <= 0 ? "Out of stock" : "Add to cart"}
+          >
+            <Button 
+              icon={<ShoppingCartOutlined />}
+              type="dashed" 
+              onClick={() => onSelectProduct(record)}
+              disabled={record.productStock <= 0 || isMaxStock}
+            >
+              {isMaxStock ? "Max Stock" : "Add to Cart"}
+            </Button>
+          </Tooltip>
+        );
+      },
     },
   ];
 
